@@ -3,12 +3,13 @@ from tensorflow.keras import layers, models, optimizers
 import matplotlib.pyplot as plt
 import numpy as np
 
-def train_evaluate_save_model(X_train, y_train, X_val, y_val, X_test, y_test):
+def build_train_evaluate_save_model(X_train, y_train, X_val, y_val, X_test, y_test, epochs=100):
     # 构建和训练模型
     m = build_cnn(X_train.shape[1:])
     m.summary()
-    train_model(m, X_train, y_train, X_val, y_val, epochs=50)
+    train_model(m, X_train, y_train, X_val, y_val, epochs=epochs)
     evaluate_and_save_model(m, X_test, y_test)
+    return m
 
 def build_cnn(input_shape):
 

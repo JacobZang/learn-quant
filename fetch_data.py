@@ -3,14 +3,21 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
-def get_qfq_data(symbol, start_date, end_date, period="daily"):
+def get_processed_data(symbol, start_date, end_date, adjust, window):
+    # 获取数据
+    df = get_adjusted_stock_data(symbol=symbol, start_date=start_date, end_date=end_date, adjust=adjust)
+    X, y = make_dataset(df, window=window)
+    return cut_dataset(X, y)
+
+
+def get_adjusted_stock_data(symbol, start_date, end_date, adjust, period="daily"):
     # 获取贵州茅台 前复权 日线行情
     df = ak.stock_zh_a_hist(
         symbol="600519", 
         period="daily", 
         start_date=start_date, 
         end_date=end_date, 
-        adjust="qfq"   # 'qfq' 前复权, 'hfq' 后复权, None 不复权
+        adjust=adjust   # 'qfq' 前复权, 'hfq' 后复权, None 不复权
     )
 
     # 列名映射：中文 -> 英文
@@ -31,9 +38,6 @@ def get_qfq_data(symbol, start_date, end_date, period="daily"):
 
     # 日期格式转换
     df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
-
-    # 删除无关列
-    df.drop(columns=["ts_code"], inplace=True)
 
     filename = f"data/{symbol}.csv"
     df.to_csv(filename, index=False, encoding="utf-8-sig")
