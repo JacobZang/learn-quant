@@ -3,6 +3,13 @@ from tensorflow.keras import layers, models, optimizers
 import matplotlib.pyplot as plt
 import numpy as np
 
+def train_evaluate_save_model(X_train, y_train, X_val, y_val, X_test, y_test):
+    # 构建和训练模型
+    m = build_cnn(X_train.shape[1:])
+    m.summary()
+    train_model(m, X_train, y_train, X_val, y_val, epochs=50)
+    evaluate_and_save_model(m, X_test, y_test)
+
 def build_cnn(input_shape):
 
     model = models.Sequential([
@@ -44,7 +51,7 @@ def train_model(model, X_train, y_train, X_val, y_val, epochs=100, batch_size=32
     model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, validation_data=(X_val, y_val), callbacks=callbacks)
 
     
-def evaluate_model(model, X_test, y_test):
+def evaluate_and_save_model(model, X_test, y_test):
     # 测试集评估
     test_loss, test_acc = model.evaluate(X_test, y_test, verbose=2)
     print("测试集 Loss:", test_loss)
@@ -53,7 +60,11 @@ def evaluate_model(model, X_test, y_test):
     probs = model.predict(X_test).ravel()
     preds = (probs > 0.5).astype(int)
 
-    # --- 可视化对比 ---
+    if test_acc >= 0.7:
+        print("达到保存模型的准确率要求，保存模型...")
+        save_model(model, path="model/cnn_model.h5")
+    
+    # 可视化对比
     plt.figure(figsize=(16,6))
     plt.plot(probs, label="Predicted Probability", color="blue", alpha=0.7)
     plt.scatter(range(len(preds)), preds, label="Predicted Label", color="blue", alpha=0.6, marker="x")
@@ -64,6 +75,15 @@ def evaluate_model(model, X_test, y_test):
     plt.legend()
     plt.grid(alpha=0.3)
     plt.tight_layout()
-
     # 保存图片
-    plt.savefig("image/test_prediction.png", dpi=300)
+    filename = f"image/acc_{test_acc:.2f}.png"
+    plt.savefig(filename, dpi=300)
+
+def save_model(model, path="model/cnn_model.h5"):
+    model.save(path)
+    print(f"模型已保存到 {path}")
+
+def load_model(path="model/cnn_model.h5"):
+    model = tf.keras.models.load_model(path)
+    print(f"模型已从 {path} 加载")
+    return model
