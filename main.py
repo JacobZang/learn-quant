@@ -17,7 +17,7 @@ def get_cnn_model(is_train=True, path="model/cnn_model.h5", symbol=None, start_d
 
 # 示例
 if __name__ == "__main__":
-    # 训练模型
+
     get_cnn_model(
         is_train=True,
         symbol="600519",
