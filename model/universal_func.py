@@ -1,57 +1,18 @@
 import tensorflow as tf
-from tensorflow.keras import layers, models, optimizers
+import model.cnn_model as cnn_model
 import matplotlib.pyplot as plt
 import numpy as np
 
-def build_train_evaluate_save_model(X_train, y_train, X_val, y_val, X_test, y_test, epochs=100):
-    # 构建和训练模型
-    m = build_cnn(X_train.shape[1:])
-    m.summary()
-    train_model(m, X_train, y_train, X_val, y_val, epochs=epochs)
-    evaluate_and_save_model(m, X_test, y_test)
-    return m
-
-def build_cnn(input_shape):
-
-    model = models.Sequential([
-        layers.Input(shape=input_shape),
-        
-        # 第一卷积层
-        layers.Conv1D(128, kernel_size=3, padding='same'),
-        layers.LeakyReLU(alpha=0.1),
-        layers.MaxPooling1D(pool_size=2),
-        
-        # 第二卷积层
-        layers.Conv1D(128, kernel_size=3, padding='same'),
-        layers.LeakyReLU(alpha=0.1),
-        layers.MaxPooling1D(pool_size=2),
-        
-        # 第三卷积层
-        layers.Conv1D(64, kernel_size=3, padding='same'),
-        layers.LeakyReLU(alpha=0.1),
-        
-        layers.GlobalAveragePooling1D(),
-        
-        # 全连接层
-        layers.Dense(128),
-        layers.ReLU(),
-        layers.Dropout(0.5),
-        
-        # 输出层
-        layers.Dense(1, activation='sigmoid')
-    ])
-    
-    # 可调整学习率
-    optimizer = optimizers.Adam(learning_rate=0.001)
-    
-    model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
+def train_evaluate_save_model(model, X_train, y_train, X_val, y_val, X_test, y_test, epochs=100):
+    model.summary()
+    train_model(model, X_train, y_train, X_val, y_val, epochs=epochs)
+    evaluate_and_save_model(model, X_test, y_test)
     return model
 
 def train_model(model, X_train, y_train, X_val, y_val, epochs=100, batch_size=32):
     callbacks = [tf.keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=10, restore_best_weights=True)]
     model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, validation_data=(X_val, y_val), callbacks=callbacks)
 
-    
 def evaluate_and_save_model(model, X_test, y_test):
     # 测试集评估
     test_loss, test_acc = model.evaluate(X_test, y_test, verbose=2)
@@ -63,7 +24,7 @@ def evaluate_and_save_model(model, X_test, y_test):
 
     if test_acc >= 0.7:
         print("达到保存模型的准确率要求，保存模型...")
-        save_model(model, path="model/cnn_model.h5")
+        save_model(model, path="model_save/cnn_model.h5")
     
     # 可视化对比
     plt.figure(figsize=(16,6))
@@ -80,11 +41,11 @@ def evaluate_and_save_model(model, X_test, y_test):
     filename = f"image/acc_{test_acc:.2f}.png"
     plt.savefig(filename, dpi=300)
 
-def save_model(model, path="model/cnn_model.h5"):
+def save_model(model, path="model_save/cnn_model.h5"):
     model.save(path)
     print(f"模型已保存到 {path}")
 
-def load_model(path="model/cnn_model.h5"):
+def load_model(path="model_save/cnn_model.h5"):
     model = tf.keras.models.load_model(path)
     print(f"模型已从 {path} 加载")
     return model

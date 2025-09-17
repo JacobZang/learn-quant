@@ -1,46 +1,8 @@
-import akshare as ak
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
-def get_processed_data(symbol, start_date, end_date, adjust, window):
-    # 获取数据
-    df = get_adjusted_stock_data(symbol=symbol, start_date=start_date, end_date=end_date, adjust=adjust)
-    X, y = make_dataset(df, window=window)
-    return cut_dataset(X, y)
-
-
-def get_adjusted_stock_data(symbol, start_date, end_date, adjust, period="daily"):
-    # 获取贵州茅台 前复权 日线行情
-    df = ak.stock_zh_a_hist(
-        symbol="600519", 
-        period="daily", 
-        start_date=start_date, 
-        end_date=end_date, 
-        adjust=adjust   # 'qfq' 前复权, 'hfq' 后复权, None 不复权
-    )
-
-    # 列名映射：中文 -> 英文
-    df.rename(columns={
-        "日期": "date",
-        "股票代码": "ts_code",
-        "开盘": "open",
-        "收盘": "close",
-        "最高": "high",
-        "最低": "low",
-        "成交量": "volume",
-        "成交额": "amount",
-        "振幅": "amplitude",
-        "涨跌幅": "pct_chg",
-        "涨跌额": "chg",
-        "换手率": "turnover"
-    }, inplace=True)
-
-    # 日期格式转换
-    df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
-
-    filename = f"data/{symbol}.csv"
-    df.to_csv(filename, index=False, encoding="utf-8-sig")
+def load_data(filename):    
     # 读取数据
     df = pd.read_csv(filename, parse_dates=["date"])
     df.sort_values("date", inplace=True)
@@ -48,7 +10,7 @@ def get_adjusted_stock_data(symbol, start_date, end_date, adjust, period="daily"
 
     return df
 
-def make_dataset(df, window=30):
+def build_featured_dataset(df, window=30):
     # 均线
     df["MA5"] = df["close"].rolling(5).mean()
     df["MA10"] = df["close"].rolling(10).mean()
