@@ -8,16 +8,15 @@ from qlib.contrib.model.base import Model
 
 def get_model_and_dataset(config: Dict[str, Any]) -> Tuple[Model, Dataset]:
     """
-    从配置字典中实例化模型和数据集。
-
-    该函数动态加载配置中指定的模型和数据集类，
-    并返回它们的实例。
+    从配置字典中实例化模型和数据集
+    该函数动态加载配置中指定的模型和数据集类
+    并返回它们的实例
 
     参数:
-        config (Dict[str, Any]): 一个包含 'model' 和 'dataset' 键的字典。
+        config (Dict[str, Any]): 一个包含 'model' 和 'dataset' 键的字典
 
     返回:
-        Tuple[Model, Dataset]: 一个包含实例化的模型和数据集的元组。
+        Tuple[Model, Dataset]: 一个包含实例化的模型和数据集的元组
     """
     # 实例化数据集
     dataset_config = config["dataset"]
@@ -47,7 +46,7 @@ def get_model_and_dataset_from_yaml(config_path: str) -> Tuple[Model, Dataset]:
         config_path (str): yaml 文件的路径
 
     返回:
-        Tuple[Model, Dataset]: 一个包含实例化的模型和数据集的元组。
+        Tuple[Model, Dataset]: 一个包含实例化的模型和数据集的元组
     """
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
@@ -74,7 +73,7 @@ def get_model_and_dataset_from_yaml(config_path: str) -> Tuple[Model, Dataset]:
     return model, dataset
 
 def _get_callable(module_path: str, class_name: str):
-    """从模块中动态加载一个类。"""
+    """从模块中动态加载一个类"""
     try:
         module = importlib.import_module(module_path)
         return getattr(module, class_name)

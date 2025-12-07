@@ -18,17 +18,17 @@ from src.utils import get_model_and_dataset_from_yaml
 
 def train_model(config_path: str):
     """
-    根据指定的 YAML 配置文件训练模型。
+    根据指定的 YAML 配置文件训练模型
 
-    此函数是为简化的 `predict_config.yaml` 设计的。
-    1. 加载配置。
-    2. 初始化 Qlib。
-    3. 使用工具函数创建模型和数据集实例。
-    4. 将模型拟合到数据集上。
-    5. 将训练好的模型保存到配置中指定的路径。
+    此函数是为简化的 `predict_config.yaml` 设计的
+    1. 加载配置
+    2. 初始化 Qlib
+    3. 使用工具函数创建模型和数据集实例
+    4. 将模型拟合到数据集上
+    5. 将训练好的模型保存到配置中指定的路径
 
     参数:
-        config_path (str): YAML 配置文件的路径。
+        config_path (str): YAML 配置文件的路径
     """
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
@@ -53,7 +53,7 @@ def train_model(config_path: str):
     
     logger.info(f"正在将模型保存到 {model_path}")
     model.save(model_path)
-    logger.info("模型已保存。")
+    logger.info("模型已保存")
 
 
 if __name__ == "__main__":

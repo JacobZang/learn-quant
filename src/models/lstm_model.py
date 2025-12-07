@@ -77,7 +77,7 @@ class LSTMModel(ForecastModel):
         构建并返回 LSTMNet 模型
 
         返回:
-            LSTMNet: LSTM 网络的一个实例。
+            LSTMNet: LSTM 网络的一个实例
         """
         # 诸如 d_feat, hidden_size 等参数存储在 self 中，从基类的 __init__ 继承而来
         return LSTMNet(

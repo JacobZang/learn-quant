@@ -4,7 +4,7 @@ import math
 from .forecast_base import ForecastModel
 
 class PositionalEncoding(nn.Module):
-    """向序列中的词元（token）注入一些关于其相对或绝对位置的信息。"""
+    """向序列中的词元（token）注入一些关于其相对或绝对位置的信息"""
     def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 5000):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
@@ -27,9 +27,9 @@ class PositionalEncoding(nn.Module):
 
 class TransformerNet(nn.Module):
     """
-    一个简化的基于 Transformer 的预测模型。
+    一个简化的基于 Transformer 的预测模型
 
-    该模型使用 Transformer 编码器来处理输入序列。
+    该模型使用 Transformer 编码器来处理输入序列
     """
     def __init__(
         self,
@@ -78,9 +78,9 @@ class TransformerNet(nn.Module):
 
 class TransformerModel(ForecastModel):
     """
-    Transformer 网络的 Qlib 兼容包装器。
+    Transformer 网络的 Qlib 兼容包装器
 
-    与基类相比，此类需要额外的参数 (`d_model`, `nhead`)。
+    与基类相比，此类需要额外的参数 (`d_model`, `nhead`)
     """
     def __init__(
         self,

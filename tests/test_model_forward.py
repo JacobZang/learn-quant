@@ -18,14 +18,14 @@ BATCH_SIZE = 32
 
 @pytest.fixture
 def dummy_input_tensor():
-    """为测试提供一个标准的虚拟输入张量。"""
+    """为测试提供一个标准的虚拟输入张量"""
     return torch.randn(BATCH_SIZE, SEQ_LEN, D_FEAT)
 
 def test_lstm_model_forward_pass(dummy_input_tensor):
     """
-    测试 LSTMModel 的前向传播。
-    - 检查模型是否可以被实例化。
-    - 检查输出形状是否正确。
+    测试 LSTMModel 的前向传播
+    - 检查模型是否可以被实例化
+    - 检查输出形状是否正确
     """
     model = LSTMModel(
         d_feat=D_FEAT,
@@ -52,9 +52,9 @@ def test_lstm_model_forward_pass(dummy_input_tensor):
 
 def test_transformer_model_forward_pass(dummy_input_tensor):
     """
-    测试 TransformerModel 的前向传播。
-    - 检查模型是否可以被实例化。
-    - 检查输出形状是否正确。
+    测试 TransformerModel 的前向传播
+    - 检查模型是否可以被实例化
+    - 检查输出形状是否正确
     """
     model = TransformerModel(
         d_feat=D_FEAT,

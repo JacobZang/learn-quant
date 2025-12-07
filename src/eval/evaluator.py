@@ -12,9 +12,9 @@ from qlib.utils import init_instance_by_config
 
 class CompleteEvaluator(Recorder):
     """
-    一个完整、统一的评估器。
-    它在 qrun 工作流中被调用，通过接收配置来自己实例化所需的数据集，
-    然后一次性完成指标计算和投资组合回测。
+    一个完整、统一的评估器
+    它在 qrun 工作流中被调用，通过接收配置来自己实例化所需的数据集
+    然后一次性完成指标计算和投资组合回测
     """
 
     def __init__(self, dataset_config, strategy_config, backtest_config, **kwargs):
@@ -30,21 +30,21 @@ class CompleteEvaluator(Recorder):
 
     def generate(self, **kwargs):
         """qrun 工作流主入口"""
-        # 1️⃣ 加载预测结果
+        # 加载预测结果
         try:
             pred_df = self.recorder.load_object("pred.pkl")
         except (FileNotFoundError, AttributeError) as e:
             raise ValueError(f"无法加载 pred.pkl：{e}")
 
-        # 2️⃣ 实例化数据集
+        # 实例化数据集
         dataset: DatasetH = init_instance_by_config(self.dataset_config)
         if dataset is None:
             raise ValueError("数据集实例化失败，请检查 config")
 
-        # 3️⃣ 计算指标
+        # 计算指标
         self.calculate_metrics(pred_df, dataset)
 
-        # 4️⃣ 执行回测
+        # 执行回测
         self.run_backtest(pred_df)
 
     def calculate_metrics(self, pred_df: pd.DataFrame, dataset: DatasetH):
@@ -58,7 +58,7 @@ class CompleteEvaluator(Recorder):
         ]
 
         if not label_cols:
-            print("⚠️ 未找到 label 列，跳过指标计算")
+            print("未找到 label 列，跳过指标计算")
             return
 
         label_df = df_test[label_cols].copy()
@@ -67,7 +67,7 @@ class CompleteEvaluator(Recorder):
         merged_df = pd.concat([pred_df, label_df], axis=1, join="inner").dropna()
 
         if merged_df.empty:
-            print("⚠️ 预测与标签无法对齐，指标设为 0")
+            print("预测与标签无法对齐，指标设为 0")
             metrics = {'IC': 0.0, 'Rank_IC': 0.0, 'ICIR': 0.0, 'Rank_ICIR': 0.0}
         else:
             df_cal = pd.DataFrame({
@@ -89,17 +89,11 @@ class CompleteEvaluator(Recorder):
                 'Rank_ICIR': rank_ic_by_day.mean() / (rank_ic_by_day.std() + 1e-9),
             }
 
-        print("✅ 已计算指标:", {k: f"{v:.4f}" for k, v in metrics.items()})
+        print("已计算指标:", {k: f"{v:.4f}" for k, v in metrics.items()})
         self.recorder.save_objects(**metrics)
 
     def run_backtest(self, pred_df: pd.DataFrame):
-        """
-        使用当前 Qlib 正确回测接口（兼容你版本）
-        """
-        from qlib.contrib.strategy import TopkDropoutStrategy
-        from qlib.workflow import R
-        from qlib.data import D
-
+      
         strategy = TopkDropoutStrategy(
             signal=pred_df,
             topk=50,
@@ -110,13 +104,13 @@ class CompleteEvaluator(Recorder):
         start_time = pred_df.index.get_level_values("datetime").min()
         end_time = pred_df.index.get_level_values("datetime").max()
 
-        print(f"✅ 回测区间: {start_time} ~ {end_time}")
+        print(f"回测区间: {start_time} ~ {end_time}")
 
         # 获取交易日历
         calendar = D.calendar(freq="day")
 
         if calendar is None or len(calendar) == 0:
-            print("❌ 无法加载交易日历")
+            print("无法加载交易日历")
             return
 
         # 导入正确的 Qlib 回测引擎
@@ -136,12 +130,12 @@ class CompleteEvaluator(Recorder):
                 },
             )
         except Exception as e:
-            print(f"❌ 回测执行失败: {e}")
+            print(f"回测执行失败: {e}")
             return
 
         analysis = risk_analysis(report_df)
 
-        print("✅ 回测结果:")
+        print("回测结果:")
         print(analysis)
         self.recorder.save_objects(**{"portfolio_analysis": analysis})
 

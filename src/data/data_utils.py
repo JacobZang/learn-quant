@@ -9,25 +9,25 @@ from qlib.data.dataset.handler import DataHandlerLP
 
 class TimeSeriesDataset(Dataset):
     """
-    用于 Qlib 时间序列数据的自定义 PyTorch 数据集。
+    用于 Qlib 时间序列数据的自定义 PyTorch 数据集
 
-    该数据集将时间序列数据组织成固定长度（`seq_len`）的序列。
+    该数据集将时间序列数据组织成固定长度（`seq_len`）的序列
     数据集中的每个样本都是一个元组，包含：
-    - 一个历史特征序列 (x)。
-    - 对应的待预测未来值 (y)。
+    - 一个历史特征序列 (x)
+    - 对应的待预测未来值 (y)
     """
 
     def __init__(self, df: pd.DataFrame, seq_len: int, pred_len: int):
         """
-        初始化数据集。
+        初始化数据集
 
         参数:
             df (pd.DataFrame):
-                一个具有多级索引（datetime, instrument）和特征/标签列的 DataFrame。
-                'feature' 列应命名为 'feature_0', 'feature_1', 等。
-                'label' 列应命名为 'label_0', 'label_1', 等。
-            seq_len (int): 输入序列的长度（回看窗口）。
-            pred_len (int): 预测序列的长度（预测范围）。
+                一个具有多级索引（datetime, instrument）和特征/标签列的 DataFrame
+                'feature' 列应命名为 'feature_0', 'feature_1', 等
+                'label' 列应命名为 'label_0', 'label_1', 等
+            seq_len (int): 输入序列的长度（回看窗口）
+            pred_len (int): 预测序列的长度（预测范围）
         """
         super().__init__()
         self.seq_len = seq_len
@@ -43,8 +43,8 @@ class TimeSeriesDataset(Dataset):
 
     def _process_df(self, df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
         """
-        从 DataFrame 中提取特征和标签，并将它们对齐成序列。
-        此方法处理按 instrument 分组和创建滚动窗口。
+        从 DataFrame 中提取特征和标签，并将它们对齐成序列
+        此方法处理按 instrument 分组和创建滚动窗口
         """
         features_cols = [c for c in df.columns if c.startswith("feature")]
         label_cols = [c for c in df.columns if c.startswith("label")]
@@ -86,18 +86,18 @@ def get_ts_data_loader(
     num_workers: int = 4,
 ) -> torch.utils.data.DataLoader:
     """
-    为 Qlib 数据集分段（train, valid, test）创建一个 PyTorch DataLoader。
+    为 Qlib 数据集分段（train, valid, test）创建一个 PyTorch DataLoader
 
     参数:
-        dataset (DatasetH): Qlib 历史数据集。
-        batch_size (int): 每批的样本数。
-        seq_len (int): 输入序列的长度。
-        pred_len (int): 预测序列的长度。
-        shuffle (bool): 是否打乱数据。
-        num_workers (int): 用于数据加载的子进程数。
+        dataset (DatasetH): Qlib 历史数据集
+        batch_size (int): 每批的样本数
+        seq_len (int): 输入序列的长度
+        pred_len (int): 预测序列的长度
+        shuffle (bool): 是否打乱数据
+        num_workers (int): 用于数据加载的子进程数
 
     返回:
-        torch.utils.data.DataLoader: 一个 DataLoader 实例。
+        torch.utils.data.DataLoader: 一个 DataLoader 实例
     """
     # 从 Qlib 数据集准备 DataFrame
     df = dataset.prepare("train", col_set=["feature", "label"], data_key=DataHandlerLP.DK_L)

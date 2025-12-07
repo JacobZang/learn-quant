@@ -14,7 +14,7 @@ from typing import Union, List, Tuple, Any
 
 class ForecastModel(Model):
     """
-    Qlib 中基于 PyTorch 的预测模型的抽象基类。
+    Qlib 中基于 PyTorch 的预测模型的抽象基类
     """
 
     def __init__(
@@ -66,7 +66,7 @@ class ForecastModel(Model):
         self.model.to(self.device)
 
     def _build_model(self) -> nn.Module:
-        raise NotImplementedError("子类必须实现 `_build_model` 方法。")
+        raise NotImplementedError("子类必须实现 `_build_model` 方法")
 
     def _get_loss(self):
         if self.loss_type == "mse":
@@ -74,7 +74,7 @@ class ForecastModel(Model):
         elif self.loss_type == "l1":
             return nn.L1Loss()
         else:
-            raise NotImplementedError(f"不支持损失函数 `{self.loss_type}`。")
+            raise NotImplementedError(f"不支持损失函数 `{self.loss_type}`")
 
     def _get_optimizer(self):
         if self.optimizer_type.lower() == "adam":
@@ -82,14 +82,14 @@ class ForecastModel(Model):
         elif self.optimizer_type.lower() == "sgd":
             return optim.SGD(self.model.parameters(), lr=self.lr)
         else:
-            raise NotImplementedError(f"不支持优化器 `{self.optimizer_type}`。")
+            raise NotImplementedError(f"不支持优化器 `{self.optimizer_type}`")
 
     def fit(self, dataset: DatasetH, evals_result: dict = None):
         df_train, df_valid = dataset.prepare(
             ["train", "valid"], col_set=["feature", "label"], data_key=DataHandlerLP.DK_L
         )
         if df_train.empty or df_valid.empty:
-            raise ValueError("训练或验证数据集为空。请检查您的数据和日期范围。")
+            raise ValueError("训练或验证数据集为空，请检查您的数据和日期范围")
 
         train_loader, _ = self._prepare_data_loader(df_train, shuffle=True)
         valid_loader, _ = self._prepare_data_loader(df_valid, shuffle=False)
@@ -136,16 +136,16 @@ class ForecastModel(Model):
             else:
                 patience -= 1
                 if patience == 0:
-                    self.logger.info("早停已触发。")
+                    self.logger.info("早停已触发")
                     break
         
         self.model.load_state_dict(best_model_state)
         self.fitted = True
-        self.logger.info(f"训练完成。最佳验证损失: {best_loss:.6f}")
+        self.logger.info(f"训练完成，最佳验证损失: {best_loss:.6f}")
 
     def predict(self, dataset: DatasetH, segment: Union[str, slice] = "test") -> pd.DataFrame:
         if not self.fitted:
-            raise RuntimeError("模型尚未训练。请先调用 `fit` 方法。")
+            raise RuntimeError("模型尚未训练，请先调用 `fit` 方法")
 
         df_pred = dataset.prepare(segment, col_set=["feature"], data_key=DataHandlerLP.DK_I)
         if df_pred.empty:
