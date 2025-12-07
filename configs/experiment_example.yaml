@@ -1,0 +1,87 @@
+# 用于 `qrun` 执行的完整配置
+
+# Qlib 初始化配置
+qlib_init:
+  provider_uri: "./qlib_data/cn_data" # Qlib 数据目录的绝对路径
+  region: "cn"
+
+# 任务定义
+task:
+  # 模型定义
+  model:
+    class: "LSTMModel"
+    module_path: "src.models.lstm_model"
+    kwargs:
+      d_feat: 158
+      hidden_size: 64
+      num_layers: 2
+      dropout: 0.2
+      pred_len: 1
+      n_epochs: 50
+      lr: 0.001
+      batch_size: 800
+      early_stop: 10
+      seq_len: 20
+      loss: "mse"
+      optimizer: "adam"
+      seed: 42
+
+  # 数据集定义 - 主流程需要此部分来训练模型
+  dataset: &id_dataset
+    class: "DatasetH"
+    module_path: "qlib.data.dataset"
+    kwargs:
+      handler:
+        class: "Alpha158"
+        module_path: "qlib.contrib.data.handler"
+        kwargs:
+          start_time: "2010-01-01"
+          end_time: "2017-12-31"
+          fit_start_time: "2010-01-01"
+          fit_end_time: "2014-12-31"
+          instruments: "csi300"
+          infer_processors:
+            - class: "RobustZScoreNorm"
+              kwargs:
+                fit_start_time: "2010-01-01"
+                fit_end_time: "2014-12-31"
+                fields_group: "feature"
+            - class: "Fillna"
+              kwargs:
+                fields_group: "feature"
+          learn_processors:
+            - class: "DropnaLabel"
+            - class: "CSRankNorm"
+              kwargs:
+                fields_group: "label"
+          label: ["Ref($close, -2) / Ref($close, -1) - 1"]
+      segments:
+        train: ["2010-01-01", "2014-12-31"]
+        valid: ["2015-01-01", "2015-12-31"]
+        test: ["2016-01-01", "2017-12-31"]
+
+  # 记录器定义
+  record:
+    # 第一步：生成预测信号
+    - class: "SignalRecord"
+      module_path: "qlib.workflow.record_temp"
+      kwargs:
+        model: <MODEL>
+        dataset: <DATASET>
+    # 第二步：使用统一的评估器
+    - class: "CompleteEvaluator"
+      module_path: "src.eval.evaluator"
+      kwargs:
+        # 将数据集配置再次传入，让评估器自给自足
+        dataset_config: *id_dataset
+        # 传入回测策略配置
+        strategy_config:
+          class: "TopkDropoutStrategy"
+          module_path: "qlib.contrib.strategy"
+          kwargs:
+            topk: 50
+            n_drop: 5
+        # 传入回测引擎配置
+        backtest_config:
+          account: 100000000
+          benchmark: "SH000300"

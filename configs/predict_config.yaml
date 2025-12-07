@@ -1,0 +1,58 @@
+# 用于手动执行脚本 (train.py, predict.py) 的简化配置
+
+# Qlib 初始化配置
+qlib_init:
+  provider_uri: "./qlib_data/cn_data"
+  region: "cn"
+
+# 数据处理器配置
+data_handler_config:
+  start_time: "2010-01-01"
+  end_time: "2017-12-31"
+  fit_start_time: "2010-01-01"
+  fit_end_time: "2014-12-31"
+  instruments: "csi300"
+  infer_processors:
+    - class: "RobustZScoreNorm"
+      kwargs:
+        fit_start_time: "2010-01-01"
+        fit_end_time: "2014-12-31"
+        fields_group: "feature"
+    - class: "Fillna"
+      kwargs:
+        fields_group: "feature"
+  learn_processors:
+    - class: "DropnaLabel"
+    - class: "CSRankNorm"
+      kwargs:
+        fields_group: "label"
+  label: ["Ref($close, -2) / Ref($close, -1) - 1"] # 预测次日的收益率
+
+# 模型配置
+model:
+  class: "LSTMModel"
+  module_path: "src.models.lstm_model" # 如果更换模型，请更新此路径
+  kwargs:
+    d_feat: 6 # 特征维度, 对应于 ['KLEN', 'OPEN', 'CLOSE', 'HIGH', 'LOW', 'VOLUME'] 的长度
+    hidden_size: 64
+    num_layers: 2
+    dropout: 0.2
+    n_epochs: 50
+    lr: 0.001
+    batch_size: 800
+    early_stop: 10
+    seq_len: 20
+    pred_len: 1 # 与 label 定义相对应
+    loss: "mse"
+    optimizer: "adam"
+    seed: 42
+
+# 训练与输出配置
+output_dir: "model_checkpoints"
+prediction_path: "prediction_output/preds.csv"
+log_dir: "logs"
+
+# 预测配置 (用于 predict.py)
+prediction_dataset:
+  start_time: "2017-01-01"
+  end_time: "2017-12-31"
