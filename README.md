@@ -49,7 +49,7 @@ conda activate qlib-env
 pip install pyqlib
 ```
 
-### C. 安装其他依赖
+### 安装其他依赖
 
 从 `requirements.txt` 文件安装其余的依赖项。
 
@@ -81,11 +81,6 @@ python -m qlib.cli.data qlib_data --target_dir ./qlib_data --region cn
 
 1.  **配置：** 打开 `configs/experiment_example.yaml` 并验证 `qlib_init` 部分的 `provider_uri` 指向您的 Qlib 数据目录。
 结构：
-    task
-    ├── model        - 用哪个模型、模型超参
-    ├── dataset      - 用什么数据（handler + segment）
-    └── record       - 怎么记录结果
-
 
 2.  **运行实验：**
     ```bash
