@@ -7,7 +7,6 @@
 ```
 .
 ├── .gitignore
-├── Dockerfile
 ├── README.md
 ├── requirements.txt
 ├── configs
