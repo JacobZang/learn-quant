@@ -5,3 +5,5 @@ __pycache__/
 
 qlib_data/
 mlruns/
+backtest_result/
+positions_log/

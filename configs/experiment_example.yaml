@@ -83,5 +83,5 @@ task:
             n_drop: 5
         # 传入回测引擎配置
         backtest_config:
-          account: 100000000
+          account: 10000
           benchmark: "SH000300"
