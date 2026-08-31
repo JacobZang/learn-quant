@@ -13,7 +13,7 @@ description: 价值投资分析框架：基本面检查清单、股债收益差�
 |-----------|-----------|
 | 拿到个股，怎么开始分析、要什么数据 | [分析工作流](references/analysis-workflow.md) |
 | 分析一家公司值不值得买 | [基本面分析](references/fundamental-analysis.md) |
-| 四维打分体系（13 分制） | [打分体系](references/scoring-system.md) |
+| 四维打分体系（15 分制） | [打分体系](references/scoring-system.md) |
 | 判断大盘/指数该不该进场 | [股债收益差](references/equity-bond-spread.md) |
 | 分析周期股（航运/煤炭/石油/钢铁） | [周期行业投资](references/cyclical-industry.md) |
 | 遇到丑闻/黑天鹅/特殊情况 | [特殊情况投资法](references/special-situations.md) |
