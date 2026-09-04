@@ -76,9 +76,26 @@ class BacktestResult:
     turnovers: list           # [(date, 单边换手率), ...]
 
 
-def run_backtest(panel, factor_scores, cfg, cost, capital=1_000_000):
-    """主循环:决策日 T 收盘定目标权重,T+1 开盘成交(无未来函数)。"""
-    rebal = set(rebalance_dates(panel.dates))
+def run_backtest(panel, factor_scores, cfg, cost, capital=1_000_000,
+                 strategy_fn=None, rebalance_dates_fn=None):
+    """主循环:决策日 T 收盘定目标权重,T+1 开盘成交(无未来函数)。
+
+    strategy_fn:       权重函数,签名为 (panel, factor_scores, date, cfg, holdings, holding_age)
+                       -> pd.Series(symbol->weight)。默认 select_weights。
+    rebalance_dates_fn: 调仓日期函数,签名为 (dates) -> DatetimeIndex。
+                       默认 rebalance_dates(周频)。可通过 cfg 类型自动推断。
+    """
+    if strategy_fn is None:
+        strategy_fn = select_weights
+    if rebalance_dates_fn is None:
+        from .strategy import AllocationConfig
+        if isinstance(cfg, AllocationConfig):
+            from .strategy import rebalance_dates_periodic
+            rebalance_dates_fn = lambda d: rebalance_dates_periodic(d, cfg.rebalance_freq)
+        else:
+            rebalance_dates_fn = rebalance_dates
+
+    rebal = set(rebalance_dates_fn(panel.dates))
     port = Portfolio(capital, panel.symbols)
     pending = None
     current_holdings = set()
@@ -101,7 +118,7 @@ def run_backtest(panel, factor_scores, cfg, cost, capital=1_000_000):
         navs.append(port.nav(panel.close.loc[t]))
         # 3) 若是决策日,用当日收盘价定新目标(次日执行)
         if t in rebal:
-            pending = select_weights(panel, factor_scores, t, cfg, current_holdings, holding_age)
+            pending = strategy_fn(panel, factor_scores, t, cfg, current_holdings, holding_age)
 
     return BacktestResult(
         nav=pd.Series(navs, index=panel.dates),

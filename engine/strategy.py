@@ -18,6 +18,51 @@ def rebalance_dates(dates):
     return s.groupby(dates.to_period("W")).tail(1).index
 
 
+@dataclass
+class AllocationConfig:
+    """固定权重资产配置(再平衡策略),与动量选股的 StrategyConfig 并列。
+
+    weights:        {symbol: weight} 字典,权重归一化后和为 1
+    rebalance_freq: 再平衡频率 "weekly" | "monthly" | "quarterly"
+    """
+    weights: dict = None
+    rebalance_freq: str = "monthly"
+
+    def __post_init__(self):
+        if not self.weights:
+            raise ValueError("AllocationConfig.weights 不能为空")
+        total = sum(self.weights.values())
+        if total <= 0:
+            raise ValueError("权重之和必须为正")
+        self.weights = {k: v / total for k, v in self.weights.items()}
+
+
+_FREQ_PERIOD = {"weekly": "W", "monthly": "M", "quarterly": "Q"}
+
+
+def rebalance_dates_periodic(dates, freq="monthly"):
+    """每个自然月/季/周最后一个交易日 = 决策日(定期再平衡)。
+
+    只支持 AllocationConfig 支持的三种频率;与 rebalance_dates(周频)语义一致。
+    """
+    period = _FREQ_PERIOD[freq]
+    s = pd.Series(0, index=dates)
+    return s.groupby(dates.to_period(period)).tail(1).index
+
+
+def allocate_weights(panel, factor_scores, date, cfg, holdings=None, holding_age=None):
+    """固定权重分配:忽略因子与持仓状态,直接返回 cfg.weights。
+
+    签名与 select_weights 兼容,便于插入 run_backtest 的 strategy_fn 槽位。
+    未出现在 panel.symbols 或 cfg.weights 里的标的补 0。
+    """
+    w = pd.Series(0.0, index=panel.symbols)
+    for sym, weight in cfg.weights.items():
+        if sym in w.index:
+            w[sym] = weight
+    return w
+
+
 def select_weights(panel, factor_scores, date, cfg, holdings=None, holding_age=None):
     """在决策日 `date` 收盘,返回目标权重 Series(symbol -> weight,和为 1)。
 
